@@ -67,6 +67,8 @@ RUN jupyter labextension install jupyterlab-server-proxy
 ENV PATH="${PATH}:/usr/lib/rstudio-server/bin"
 ENV LD_LIBRARY_PATH="/usr/lib/R/lib:/lib:/usr/lib/jvm/java-7-openjdk-amd64/jre/lib/amd64/server:/opt/conda/lib/R/lib"
 #ENV LD_LIBRARY_PATH="/usr/lib/R/lib:/lib:/usr/lib/x86_64-linux-gnu:/usr/lib/jvm/java-7-openjdk-amd64/jre/lib/amd64/server:/opt/conda/lib/R/lib"
-
+RUN jupyter labextension install jupyterlab-topbar-extension && \
+    jupyter labextension install jupyterlab-system-monitor
 USER jovyan
 RUN echo "export EDITOR=/usr/bin/vim" >> /home/jovyan/.bashrc
+
