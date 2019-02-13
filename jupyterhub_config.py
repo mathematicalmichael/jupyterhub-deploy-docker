@@ -29,22 +29,29 @@ class MyDockerSpawner(DockerSpawner):
             if len(parts) >= 1:
                 user_name = parts[0]
                 group_map[user_name] = []
-
+                # parse group names and add them to list for each user. 
                 for i in range(1,len(parts)):
                     group_id = parts.pop()
-                    if group_id != 'admin': # no need for an admin group.
-                        group_map[user_name].append(group_id)
+                    group_map[user_name].append(group_id)
+
     def start(self):
         if self.user.name in self.group_map:
             group_list = self.group_map[self.user.name]
             # add team volume to volumes
-            for group_id in group_list:
-                self.volumes['shared-{}'.format(group_id)] = {
-                    'bind': '/home/jovyan/%s'%(group_id),
-                    'mode': 'rw',  # or ro for read-only
+            for group_id in group_list: # admin users
+                if group_id != 'admin':
+                    if 'admin' in group_list:
+                        self.volumes['shared-{}'.format(group_id)] = {
+                        'bind': '/home/jovyan/%s'%(group_id),
+                        'mode': 'rw',  # or ro for read-only
+                        }
+                    else: # default users
+                       self.volumes['shared-{}'.format(group_id)] = {
+                        'bind': '/home/jovyan/%s'%(group_id),
+                        'mode': 'ro',  # or ro for read-only
                     }
         if self.user.name == 'hub-admin': # if admin, allow userlist access
-            self.volumes[os.path.join(pwd,'userlist')] = { 'bind': '/home/jovyan/userlist',
+            self.volumes['/home/math/roncoa/stathub/userlist'] = { 'bind': '/home/jovyan/userlist',
                                                             'mode': 'rw' }
         return super().start()
 
@@ -74,7 +81,7 @@ spawn_cmd = os.environ.get('DOCKER_SPAWN_CMD', "start-singleuser.sh")
 c.DockerSpawner.extra_create_kwargs.update({ 'command': spawn_cmd })
 
 # Memory limit
-c.Spawner.mem_limit = '2G'  # RAM limit
+c.Spawner.mem_limit = '64G'  # RAM limit
 c.Spawner.cpu_limit = 0.0001
 
 # Connect containers to this Docker network
