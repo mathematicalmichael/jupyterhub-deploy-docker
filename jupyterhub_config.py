@@ -1,5 +1,6 @@
 # Copyright (c) Jupyter Development Team.
 # Distributed under the terms of the Modified BSD License.
+# Major edits by MathematicalMichael(.com) 02-2019
 
 # Configuration file for JupyterHub
 import os
@@ -51,8 +52,10 @@ class MyDockerSpawner(DockerSpawner):
                         'mode': 'ro',  # or ro for read-only
                     }
         if self.user.name == 'hub-admin': # if admin, allow userlist access
-            self.volumes['/home/math/roncoa/stathub/userlist'] = { 'bind': '/home/jovyan/userlist',
-                                                            'mode': 'rw' }
+            self.volumes['%s/userlist'%(os.environ['HUB_LOC'])] = \
+                { 'bind': '/home/jovyan/userlist', 'mode': 'rw' }
+            self.volumes['%s/jupyterhub_config.py'%(os.environ['HUB_LOC'])] = \
+                { 'bind': '/home/jovyan/jupyterhub_config.py', 'mode': 'rw' }
         return super().start()
 
 c.JupyterHub.spawner_class = MyDockerSpawner
