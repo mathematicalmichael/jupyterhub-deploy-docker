@@ -34,28 +34,27 @@ class MyDockerSpawner(DockerSpawner):
                 for i in range(1,len(parts)):
                     group_id = parts.pop()
                     group_map[user_name].append(group_id)
-
     def start(self):
         if self.user.name in self.group_map:
             group_list = self.group_map[self.user.name]
             # add team volume to volumes
-            for group_id in group_list: # admin users
+           for group_id in group_list: # admins in userlist get to write files.
                 if group_id != 'admin':
-                    if 'admin' in group_list:
+                    if 'admin' in group_list: 
                         self.volumes['shared-{}'.format(group_id)] = {
-                        'bind': '/home/jovyan/%s'%(group_id),
-                        'mode': 'rw',  # or ro for read-only
-                        }
-                    else: # default users
-                       self.volumes['shared-{}'.format(group_id)] = {
-                        'bind': '/home/jovyan/%s'%(group_id),
-                        'mode': 'ro',  # or ro for read-only
-                    }
-        if self.user.name == 'hub-admin': # if admin, allow userlist access
-            self.volumes['%s/userlist'%(os.environ['HUB_LOC'])] = \
-                { 'bind': '/home/jovyan/userlist', 'mode': 'rw' }
-            self.volumes['%s/jupyterhub_config.py'%(os.environ['HUB_LOC'])] = \
-                { 'bind': '/home/jovyan/jupyterhub_config.py', 'mode': 'rw' }
+                            'bind': '/home/jovyan/%s'%(group_id),
+                            'mode': 'rw',  # or ro for read-only
+                            }
+                    else: # this "shared-" is part of the naming convention
+                        self.volumes['shared-{}'.format(group_id)] = {
+                            'bind': '/home/jovyan/%s'%(group_id),
+                            'mode': 'ro', 
+                            }
+                else: # if admin is one of the groups in userlist, mount the following:
+                    self.volumes['%s/userlist'%(os.environ['HUB_LOC'])] = \
+                        { 'bind': '/home/jovyan/userlist', 'mode': 'rw' }
+                    self.volumes['%s/jupyterhub_config.py'%(os.environ['HUB_LOC'])] = \
+                        { 'bind': '/home/jovyan/jupyterhub_config.py', 'mode': 'rw' }
         return super().start()
 
 c.JupyterHub.spawner_class = MyDockerSpawner
