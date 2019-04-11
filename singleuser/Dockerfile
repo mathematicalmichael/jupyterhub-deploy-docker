@@ -48,9 +48,7 @@ RUN python3 -m pip install --no-cache jupyterhub==$JUPYTERHUB_VERSION nbresuse &
     npm cache clean --force && \
     rm -rf $CONDA_DIR/share/jupyter/lab/staging && \
     rm -rf /home/$NB_USER/.cache/yarn && \
-    rm -rf /home/$NB_USER/.node-gyp && \
-    fix-permissions $CONDA_DIR && \
-    fix-permissions /home/$NB_USER
+    rm -rf /home/$NB_USER/.node-gyp
 
 # R environment 
 USER root
@@ -61,8 +59,9 @@ RUN apt-get update && \
         libedit2 \
         lsb-release \
         psmisc \
-        libssl1.0.0 \
-        ;
+        libssl1.0.0 && \
+    fix-permissions $CONDA_DIR && \
+    fix-permissions /home/$NB_USER
 
 # You can use rsession from rstudio's desktop package as well.
 ENV RSTUDIO_PKG=rstudio-server-1.1.463-amd64.deb
@@ -70,7 +69,11 @@ ENV RSTUDIO_PKG=rstudio-server-1.1.463-amd64.deb
 RUN wget -q http://download2.rstudio.org/${RSTUDIO_PKG}
 RUN dpkg -i ${RSTUDIO_PKG}
 RUN rm ${RSTUDIO_PKG}
-RUN conda install -c r r-shiny && conda clean -tipsy
+# INSTALL R PACKAGES HERE
+RUN conda install -c r --quiet --yes \
+    'r-shiny' \
+    'r-reticulate' && \
+    conda clean -tipsy
 RUN apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 
