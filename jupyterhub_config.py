@@ -42,10 +42,18 @@ class MyDockerSpawner(DockerSpawner):
             for group_id in group_list: # admins in userlist get to write files.
                 if group_id != 'admin':
                     if 'admin' in group_list: 
+                        if group_id == 'mixtures':
+                            self.volumes['mixtures'] = \
+                                {'bind': '/nfs/storage/math/gross-s2/projects/%s'%(group_id),
+                                'mode': 'rw' } # or rw for write (can cause conflicts)
                         self.volumes['shared-{}'.format(group_id)] = \
-                            { 'bind': '/home/jovyan/%s'%(group_id),
+                                { 'bind': '/home/jovyan/%s'%(group_id),
                                 'mode': 'rw' } # or ro for read-only
                     else: # this "shared-" is part of the naming convention
+                        if group_id == 'mixtures':
+                            self.volumes['mixtures'] = \
+                            {'bind': '/nfs/storage/math/gross-s2/projects/%s'%(group_id),
+                                'mode': 'ro' } # or rw for write (can cause conflicts)
                         self.volumes['shared-{}'.format(group_id)] = \
                             {'bind': '/home/jovyan/%s'%(group_id),
                                 'mode': 'ro' } # or rw for write (can cause conflicts)
@@ -54,6 +62,7 @@ class MyDockerSpawner(DockerSpawner):
                         { 'bind': '/home/jovyan/userlist', 'mode': 'rw' }
                     self.volumes['%s/jupyterhub_config.py'%(os.environ['HUB_LOC'])] = \
                         { 'bind': '/home/jovyan/jupyterhub_config.py', 'mode': 'rw' }
+        self.environment['JUPYTER_ENABLE_LAB'] = 'yes'
         return super().start()
 
 c.JupyterHub.spawner_class = MyDockerSpawner
@@ -97,7 +106,7 @@ c.DockerSpawner.extra_host_config = { 'network_mode': network_name }
 # user `jovyan`, and set the notebook directory to `/home/jovyan/work`.
 # We follow the same convention.
 notebook_dir = os.environ.get('DOCKER_NOTEBOOK_DIR') or '/home/jovyan/work'
-c.DockerSpawner.notebook_dir = notebook_dir
+#c.DockerSpawner.notebook_dir = notebook_dir
 # Mount the real user's Docker volume on the host to the notebook user's
 # notebook directory in the container
 c.DockerSpawner.volumes = { 'hub-user-{username}': notebook_dir }

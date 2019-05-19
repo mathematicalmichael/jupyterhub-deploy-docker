@@ -72,6 +72,7 @@ RUN rm ${RSTUDIO_PKG}
 # INSTALL R PACKAGES HERE
 RUN conda install -c r --quiet --yes \
     'r-shiny' \
+    'r-nloptr' \
     'r-reticulate' && \
     conda clean -tipsy
 RUN apt-get clean && \
