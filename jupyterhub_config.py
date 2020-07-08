@@ -63,7 +63,9 @@ class MyDockerSpawner(DockerSpawner):
                     self.volumes['%s/jupyterhub_config.py'%(os.environ['HUB_LOC'])] = \
                         { 'bind': '/home/jovyan/jupyterhub_config.py', 'mode': 'rw' }
         self.environment['JUPYTER_ENABLE_LAB'] = 'yes'
-	self.environment['NB_USER'] = self.user.name.split('_')[0]
+        self.environment['NB_USER'] = self.user.name.split('_')[0]
+        self.environment['GRANT_SUDO'] = 1
+
         return super().start()
 
 c.JupyterHub.spawner_class = MyDockerSpawner
