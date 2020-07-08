@@ -56,7 +56,7 @@ class MyDockerSpawner(DockerSpawner):
                                 'mode': 'ro' } # or rw for write (can cause conflicts)
                         self.volumes['shared-{}'.format(group_id)] = \
                             {'bind': '/home/jovyan/%s'%(group_id),
-                                'mode': 'ro' } # or rw for write (can cause conflicts)
+                                'mode': 'rw' } # or rw for write (can cause conflicts)
                 else: # if admin is one of the groups in userlist, mount the following:
                     self.volumes['%s/userlist'%(os.environ['HUB_LOC'])] = \
                         { 'bind': '/home/jovyan/userlist', 'mode': 'rw' }
@@ -106,7 +106,7 @@ c.DockerSpawner.extra_host_config = { 'network_mode': network_name }
 # user `jovyan`, and set the notebook directory to `/home/jovyan/work`.
 # We follow the same convention.
 notebook_dir = os.environ.get('DOCKER_NOTEBOOK_DIR') or '/home/jovyan/work'
-#c.DockerSpawner.notebook_dir = notebook_dir
+c.DockerSpawner.notebook_dir = notebook_dir
 # Mount the real user's Docker volume on the host to the notebook user's
 # notebook directory in the container
 c.DockerSpawner.volumes = { 'hub-user-{username}': notebook_dir }
@@ -182,10 +182,10 @@ c.JupyterHub.db_url = 'postgresql://postgres:{password}@{host}/{db}'.format(
 c.JupyterHub.admin_access = True 
 
 # Run script to automatically stop idle single-user servers as a jupyterhub service.
-c.JupyterHub.services = [
-    {
-        'name': 'cull_idle',
-        'admin': True,
-        'command': 'python /srv/jupyterhub/cull_idle_servers.py --timeout=3600'.split(),
-    },
-]
+#c.JupyterHub.services = [
+#    {
+#        'name': 'cull_idle',
+#        'admin': True,
+#        'command': 'python /srv/jupyterhub/cull_idle_servers.py --timeout=3600'.split(),
+#    },
+#]
