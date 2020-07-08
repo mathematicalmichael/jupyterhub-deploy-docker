@@ -10,7 +10,7 @@ c = get_config()
 hub_name = os.environ['HUB_NAME']
 
 # Spawner dropdown menu?
-enable_options=False
+enable_options=True
 
 # We rely on environment variables to configure JupyterHub so that we
 # avoid having to rebuild the JupyterHub container every time we change a
@@ -81,9 +81,12 @@ if enable_options:
     c.DockerSpawner.image_whitelist = {'default': c.DockerSpawner.image , 
                                      'scipy-notebook': "jupyter/scipy-notebook", 
                                      'datascience-notebook': "jupyter/datascience-notebook",
+                                     'pyspark-notebook': "jupyter/pyspark-notebook",
                                      'r-notebook': 'jupyter/r-notebook',
                                      'base-notebook': "jupyter/base-notebook",
-                                     'RStudio': 'rstudio'}
+                                     'RStudio 4.0.1': 'rstudio:4.0.1',
+                                     'RStudio 3.6': 'rstudio:3.6'
+                                      }
 
 # JupyterHub requires a single-user instance of the Notebook server, so we
 # default to using the `start-singleuser.sh` script included in the
