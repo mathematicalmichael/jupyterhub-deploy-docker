@@ -107,7 +107,6 @@ c.JupyterHub.spawner_class = MyDockerSpawner
 #c.DockerSpawner.image = '%s-user'%hub_name
 c.DockerSpawner.name_template = 'hub-{servername}-{username}'
 c.DockerSpawner.allowed_images = imageList
-
 # JupyterHub requires a single-user instance of the Notebook server, so we
 # default to using the `start-singleuser.sh` script included in the
 # jupyter/docker-stacks *-notebook images as the Docker run command when
