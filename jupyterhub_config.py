@@ -9,15 +9,27 @@ pwd = os.path.dirname(__file__)
 c = get_config()
 hub_name = os.environ['HUB_NAME']
 
-# Spawner dropdown menu?
-enable_options=True
-
 # We rely on environment variables to configure JupyterHub so that we
 # avoid having to rebuild the JupyterHub container every time we change a
 # configuration parameter.
 
 # Spawn single-user servers as Docker containers
 #c.JupyterHub.spawner_class = spawner = 'dockerspawner.DockerSpawner'
+
+imageList =  { 'scipy-notebook': 'jupyter/scipy-notebook', 
+               'datascience-notebook': 'jupyter/datascience-notebook',
+               'pyspark-notebook': 'jupyter/pyspark-notebook',
+               'r-notebook': 'jupyter/r-notebook',
+               'base-notebook': 'jupyter/base-notebook',
+               'RStudio 4.0.1': 'rstudio:4.0.1',
+               'RStudio 3.6': 'rstudio:3.6' }
+
+ops = ""
+for displayName, imageName in imageList.items():
+     ops += """<option value="{img}">{disp}</option>\n""".format(img=imageName, disp=displayName)
+
+
+
 from dockerspawner import DockerSpawner
 class MyDockerSpawner(DockerSpawner):
     group_map = {}
@@ -62,31 +74,42 @@ class MyDockerSpawner(DockerSpawner):
                         { 'bind': '/home/jovyan/userlist', 'mode': 'rw' }
                     self.volumes['%s/jupyterhub_config.py'%(os.environ['HUB_LOC'])] = \
                         { 'bind': '/home/jovyan/jupyterhub_config.py', 'mode': 'rw' }
+
         self.environment['JUPYTER_ENABLE_LAB'] = 'yes'
-        self.environment['NB_USER'] = self.user.name.split('_')[0]
+        #self.environment['NB_USER'] = self.user.name
         self.environment['GRANT_SUDO'] = 1
 
         return super().start()
 
+    def _options_form_default(self):
+        return """
+        <label for="stack">Select your desired software stack</label>
+        <select name="stack" size="1">
+	{stack}
+        </select>
+        """.format(stack=ops)
+
+    def options_from_form(self, formdata):
+        options = {}
+        options['stack'] = formdata['stack']
+        container_image = ''.join(formdata['stack'])
+        print("SPAWN: " + container_image + " IMAGE" )
+        self.container_image = container_image
+        return options
+
 c.JupyterHub.spawner_class = MyDockerSpawner
+
+
 
 # define some task to do on startup
 
 # Spawn containers from this image (or a whitelist)
 #c.DockerSpawner.image = "jupyter/datascience-notebook:7254cdcfa22b"
-c.DockerSpawner.image = '%s-user'%hub_name
-c.DockerSpawner.name_template = '{imagename}-{username}'
-if enable_options:
-    # if whitelist enabled, the .container_image will be ignored in favor of the options below:
-    c.DockerSpawner.image_whitelist = {'default': c.DockerSpawner.image , 
-                                     'scipy-notebook': "jupyter/scipy-notebook", 
-                                     'datascience-notebook': "jupyter/datascience-notebook",
-                                     'pyspark-notebook': "jupyter/pyspark-notebook",
-                                     'r-notebook': 'jupyter/r-notebook',
-                                     'base-notebook': "jupyter/base-notebook",
-                                     'RStudio 4.0.1': 'rstudio:4.0.1',
-                                     'RStudio 3.6': 'rstudio:3.6'
-                                      }
+#c.DockerSpawner.image = '%s-user'%hub_name
+c.DockerSpawner.name_template = 'hub-{servername}-{username}'
+
+c.DockerSpawner.image_whitelist = imageList
+c.DockerSpawner.allowed_images = imageList
 
 # JupyterHub requires a single-user instance of the Notebook server, so we
 # default to using the `start-singleuser.sh` script included in the
@@ -186,6 +209,8 @@ c.JupyterHub.db_url = 'postgresql://postgres:{password}@{host}/{db}'.format(
 
 # Allow admin users to log into other single-user servers (e.g. for debugging, testing)?  As a courtesy, you should make sure your users know if admin_access is enabled.
 c.JupyterHub.admin_access = True 
+
+c.JupyterHub.allow_named_servers = True
 
 # Run script to automatically stop idle single-user servers as a jupyterhub service.
 #c.JupyterHub.services = [
