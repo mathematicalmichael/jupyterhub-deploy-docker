@@ -1,17 +1,21 @@
 # Copyright (c) Jupyter Development Team.
 # Distributed under the terms of the Modified BSD License.
 ARG JUPYTERHUB_VERSION
-#FROM jupyterhub/jupyterhub-onbuild:$JUPYTERHUB_VERSION
-FROM jupyterhub/jupyterhub:$JUPYTERHUB_VERSION
+FROM jupyterhub/jupyterhub-onbuild:$JUPYTERHUB_VERSION
+#FROM jupyterhub/jupyterhub:$JUPYTERHUB_VERSION
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
     git \
+    wget \
+    && wget https://raw.githubusercontent.com/jupyterhub/jupyterhub/0.9.4/examples/cull-idle/cull_idle_servers.py \
+    && pip install git+https://github.com/jupyterhub/dockerspawner.git \
+    && apt-get remove --purge git wget -y \
+    && apt-get autoremove -y \
     && apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 
 # Install dockerspawner, oauth, postgres
 RUN pip install jupyterhub-hashauthenticator oauthenticator==0.8.*
-RUN pip install git+https://github.com/jupyterhub/dockerspawner.git
 RUN pip install -U psycopg2==2.7.*
  
 # Copy TLS certificate and key
@@ -24,4 +28,5 @@ RUN pip install -U psycopg2==2.7.*
 
 #COPY ./userlist /srv/jupyterhub/userlist
 # Download script to automatically stop idle single-user servers
-RUN wget https://raw.githubusercontent.com/jupyterhub/jupyterhub/0.9.4/examples/cull-idle/cull_idle_servers.py
+
+#jupyterhub 1.2 doesn't come with wget
