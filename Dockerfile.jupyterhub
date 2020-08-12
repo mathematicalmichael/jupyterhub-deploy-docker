@@ -1,13 +1,25 @@
 # Copyright (c) Jupyter Development Team.
 # Distributed under the terms of the Modified BSD License.
 ARG JUPYTERHUB_VERSION
-#FROM jupyterhub/jupyterhub-onbuild:$JUPYTERHUB_VERSION
-FROM jupyterhub/jupyterhub:$JUPYTERHUB_VERSION
+FROM jupyterhub/jupyterhub-onbuild:$JUPYTERHUB_VERSION
 
 # Install dockerspawner, oauth, postgres
-RUN pip install jupyterhub-hashauthenticator dockerspawner==0.11.0 oauthenticator==0.8.* psycopg2==2.7 
-#RUN pip install git+https://github.com/jupyterhub/dockerspawner.git
- 
+RUN /opt/conda/bin/conda install -yq psycopg2=2.7 && \
+    /opt/conda/bin/conda clean -tipsy && \
+    /opt/conda/bin/pip install --no-cache-dir \
+        oauthenticator==0.8.*
+
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
+    vim \
+    git \
+    && pip install git+https://github.com/jupyterhub/dockerspawner.git \
+    && apt-get remove git -y \
+    && apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
+
+RUN pip install jupyterhub-hashauthenticator #dockerspawner==0.11.0
+    
 # Copy TLS certificate and key
 #ENV SSL_CERT /srv/jupyterhub/secrets/jupyterhub.crt
 #ENV SSL_KEY /srv/jupyterhub/secrets/jupyterhub.key
@@ -18,4 +30,4 @@ RUN pip install jupyterhub-hashauthenticator dockerspawner==0.11.0 oauthenticato
 
 #COPY ./userlist /srv/jupyterhub/userlist
 # Download script to automatically stop idle single-user servers
-#RUN wget https://raw.githubusercontent.com/jupyterhub/jupyterhub/$JUPYTERHUB_VERSION/examples/cull-idle/cull_idle_servers.py
+RUN wget https://raw.githubusercontent.com/jupyterhub/jupyterhub/0.9.4/examples/cull-idle/cull_idle_servers.py
