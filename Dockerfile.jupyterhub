@@ -10,9 +10,9 @@ RUN apt-get update && \
     rm -rf /var/lib/apt/lists/*
 
 # Install dockerspawner, oauth, postgres
-RUN pip install -U psycopg2==2.7.3.1
 RUN pip install jupyterhub-hashauthenticator oauthenticator==0.8.*
 RUN pip install git+https://github.com/jupyterhub/dockerspawner.git
+RUN pip install -U psycopg2==2.7.*
  
 # Copy TLS certificate and key
 #ENV SSL_CERT /srv/jupyterhub/secrets/jupyterhub.crt
@@ -24,4 +24,4 @@ RUN pip install git+https://github.com/jupyterhub/dockerspawner.git
 
 #COPY ./userlist /srv/jupyterhub/userlist
 # Download script to automatically stop idle single-user servers
-#RUN wget https://raw.githubusercontent.com/jupyterhub/jupyterhub/$JUPYTERHUB_VERSION/examples/cull-idle/cull_idle_servers.py
+RUN wget https://raw.githubusercontent.com/jupyterhub/jupyterhub/0.9.4/examples/cull-idle/cull_idle_servers.py

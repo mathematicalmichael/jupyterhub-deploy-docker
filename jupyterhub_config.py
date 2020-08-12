@@ -75,7 +75,7 @@ class MyDockerSpawner(DockerSpawner):
                     self.volumes['%s/jupyterhub_config.py'%(os.environ['HUB_LOC'])] = \
                         { 'bind': '/home/jovyan/jupyterhub_config.py', 'mode': 'rw' }
 
-        self.environment['JUPYTER_ENABLE_LAB'] = 'yes'
+        self.environment['ENABLE_LAB'] = 'yes'
         #self.environment['NB_USER'] = self.user.name
         self.environment['GRANT_SUDO'] = 1
         return super().start()
@@ -106,7 +106,7 @@ c.JupyterHub.spawner_class = MyDockerSpawner
 #c.DockerSpawner.image = "jupyter/datascience-notebook:7254cdcfa22b"
 #c.DockerSpawner.image = '%s-user'%hub_name
 c.DockerSpawner.name_template = 'hub-{servername}-{username}'
-c.DockerSpawner.image_whitelist = imageList
+c.DockerSpawner.allowed_images = imageList
 
 # JupyterHub requires a single-user instance of the Notebook server, so we
 # default to using the `start-singleuser.sh` script included in the
