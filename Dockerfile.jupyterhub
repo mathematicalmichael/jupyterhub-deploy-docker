@@ -19,7 +19,7 @@ RUN apt-get update && \
     rm -rf /var/lib/apt/lists/*
 
 RUN pip install jupyterhub-hashauthenticator #dockerspawner==0.11.0
-    
+ENV JUPYTER_ENABLE_LAB 1
 # Copy TLS certificate and key
 #ENV SSL_CERT /srv/jupyterhub/secrets/jupyterhub.crt
 #ENV SSL_KEY /srv/jupyterhub/secrets/jupyterhub.key
